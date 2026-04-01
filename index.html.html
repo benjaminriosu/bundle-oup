@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OUP Bundle Calculator — Chile v3</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a18; font-size: 15px; line-height: 1.6; padding: 24px 16px 48px; }
+  .container { max-width: 780px; margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 0.5px solid #d3d1c7; }
+  .logo { background: #002147; color: #fff; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 6px; letter-spacing: 0.04em; flex-shrink: 0; }
+  header h1 { font-size: 18px; font-weight: 500; }
+  header p { font-size: 13px; color: #73726c; margin-top: 2px; }
+  .sec { background: #fff; border: 0.5px solid #d3d1c7; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .stitle { font-size: 11px; font-weight: 600; color: #888780; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 12px; color: #73726c; }
+  .field input { width: 100%; border: 0.5px solid #d3d1c7; border-radius: 8px; padding: 0 12px; height: 36px; font-size: 14px; color: #1a1a18; background: #fff; outline: none; }
+  .field input:focus { border-color: #888780; }
+  .frow2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media(max-width:480px){ .frow2 { grid-template-columns: 1fr; } }
+  .srow { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .slbl { font-size: 13px; color: #5f5e5a; min-width: 160px; }
+  input[type=range] { flex: 1; -webkit-appearance: none; height: 4px; background: #d3d1c7; border-radius: 2px; outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #002147; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 0 1px #d3d1c7; }
+  .sval { font-size: 13px; font-weight: 600; min-width: 44px; text-align: right; color: #1a1a18; }
+  .div { border: none; border-top: 0.5px solid #d3d1c7; margin: 14px 0; }
+  .note { font-size: 12px; color: #888780; line-height: 1.5; margin-top: 6px; }
+  .series-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  .series-table th { font-size: 11px; color: #888780; font-weight: 600; text-align: left; padding: 6px 8px; border-bottom: 0.5px solid #d3d1c7; background: #f1efe8; }
+  .series-table th:nth-child(n+2) { text-align: right; }
+  .series-table td { padding: 5px 8px; border-bottom: 0.5px solid #f1efe8; vertical-align: middle; }
+  .series-table td:nth-child(n+2) { text-align: right; }
+  .series-table .total-row { background: #f1efe8; font-weight: 600; font-size: 13px; }
+  .series-table .total-row td { border-top: 0.5px solid #d3d1c7; padding: 8px; }
+  .series-table .ote-d { background: #e6f1fb20; color: #185fa5; font-size: 13px; }
+  .series-table .ote-o { background: #faeeda20; color: #854f0b; font-size: 13px; }
+  .tin { width: 100%; border: 0.5px solid #d3d1c7; border-radius: 6px; padding: 0 8px; height: 32px; font-size: 13px; outline: none; background: #fff; color: #1a1a18; }
+  .tin:focus { border-color: #888780; }
+  .tin.r { text-align: right; }
+  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .rbtn { background: none; border: 0.5px solid #d3d1c7; border-radius: 6px; color: #888780; width: 28px; height: 28px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+  .rbtn:hover { background: #f1efe8; color: #791f1f; }
+  .abtn { background: none; border: 0.5px solid #d3d1c7; border-radius: 8px; color: #5f5e5a; padding: 7px 14px; cursor: pointer; font-size: 13px; }
+  .abtn:hover { background: #f1efe8; }
+  .mets4 { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+  .mets3 { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+  @media(max-width:560px){ .mets4,.mets3 { grid-template-columns: 1fr 1fr; } }
+  .met { border-radius: 8px; padding: 12px; background: #f1efe8; }
+  .met.blue{background:#e6f1fb} .met.green{background:#eaf3de} .met.amber{background:#faeeda} .met.red{background:#fcebeb} .met.navy{background:#002147}
+  .ml { font-size: 11px; color: #888780; margin-bottom: 4px; line-height: 1.3; }
+  .met.blue .ml{color:#185fa5} .met.green .ml{color:#3b6d11} .met.amber .ml{color:#854f0b} .met.red .ml{color:#a32d2d} .met.navy .ml{color:#85b7eb}
+  .mv { font-size: 20px; font-weight: 600; color: #1a1a18; }
+  .met.blue .mv{color:#0c447c} .met.green .mv{color:#27500a} .met.amber .mv{color:#633806} .met.red .mv{color:#791f1f} .met.navy .mv{color:#fff;font-size:22px}
+  .ms { font-size: 11px; color: #73726c; margin-top: 2px; }
+  .met.blue .ms{color:#185fa5} .met.green .ms{color:#3b6d11} .met.amber .ms{color:#854f0b} .met.red .ms{color:#a32d2d} .met.navy .ms{color:#85b7eb}
+  .alert { font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-top: 10px; line-height: 1.5; }
+  .alert.ok{background:#eaf3de;color:#27500a;border:0.5px solid #639922}
+  .alert.warn{background:#faeeda;color:#633806;border:0.5px solid #ef9f27}
+  .alert.danger{background:#fcebeb;color:#791f1f;border:0.5px solid #e24b4a}
+  .scen { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+  @media(max-width:480px){ .scen { grid-template-columns: 1fr; } }
+  .sc { border-radius: 8px; padding: 10px; border: 0.5px solid transparent; }
+  .scn{font-weight:600;margin-bottom:3px;font-size:12px} .scv{font-size:19px;font-weight:600} .scs{font-size:11px;margin-top:2px}
+  .min-badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 20px; background: #faeeda; color: #633806; font-weight: 600; }
+  .irow { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .irow label { font-size: 13px; color: #5f5e5a; min-width: 220px; }
+  .irow input { width: 120px; border: 0.5px solid #d3d1c7; border-radius: 8px; padding: 0 10px; height: 36px; font-size: 14px; }
+  footer { text-align: center; font-size: 12px; color: #888780; margin-top: 32px; padding-top: 16px; border-top: 0.5px solid #d3d1c7; }
+
+  .export-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; background: #002147; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 16px; letter-spacing: 0.01em; }
+  .export-btn:hover { background: #003070; }
+  .export-btn svg { flex-shrink: 0; }
+
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: #fff; padding: 0; font-size: 12px; }
+    .container { max-width: 100%; }
+    .no-print { display: none !important; }
+    .sec { border-radius: 8px; border: 0.5px solid #d3d1c7; padding: 14px; margin-bottom: 12px; page-break-inside: avoid; }
+    header { padding-bottom: 12px; margin-bottom: 16px; }
+    .mets4 { grid-template-columns: repeat(4,1fr); gap: 8px; }
+    .mets3 { grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .met { padding: 8px 10px; }
+    .mv { font-size: 16px; }
+    .met.navy .mv { font-size: 16px; }
+    .series-table th, .series-table td { padding: 5px 6px; font-size: 11px; }
+    .tin { border: none; background: transparent; padding: 0; height: auto; font-size: 12px; }
+    .rbtn, .abtn { display: none; }
+    input[type=range] { display: none; }
+    .sval { display: inline; }
+    .slbl { display: inline; }
+    .srow { gap: 6px; }
+    .scen { grid-template-columns: repeat(3,1fr); gap: 6px; }
+    .sc { padding: 8px; }
+    .scv { font-size: 15px; }
+    footer { margin-top: 16px; }
+    .print-timestamp { display: block !important; }
+  }
+  .print-timestamp { display: none; font-size: 11px; color: #888780; text-align: right; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">OUP</div>
+    <div>
+      <h1>Bundle Calculator — Chile</h1>
+      <p>Texto + Oxford Test of English (OTE) · Books &amp; Bits · v3</p>
+    </div>
+  </header>
+
+  <div class="sec">
+    <div class="stitle">Colegio y compra efectiva</div>
+    <div class="frow2">
+      <div class="field">
+        <label>Nombre del colegio</label>
+        <input type="text" id="school-name" placeholder="Colegio X" oninput="calcResults()">
+      </div>
+      <div>
+        <div class="srow" style="margin-top:20px">
+          <span class="slbl">% compra efectiva</span>
+          <input type="range" id="pct-eff" min="10" max="100" value="70" step="1" oninput="syncEff();calcResults()">
+          <span class="sval" id="val-eff">70%</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:12px;color:#888780">Mínimo para activar bundle:</span>
+      <span class="min-badge">50% de compra efectiva</span>
+      <span style="font-size:12px;color:#888780">100% = colegio compra directo.</span>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Series adoptadas</div>
+    <div style="overflow-x:auto">
+      <table class="series-table">
+        <thead>
+          <tr>
+            <th style="min-width:140px">Serie</th>
+            <th style="min-width:95px">N° alumnos</th>
+            <th style="min-width:120px">RRP/alumno (CLP)</th>
+            <th style="min-width:90px">OTE direct</th>
+            <th style="min-width:90px">OTE ops</th>
+            <th style="min-width:100px">Pack/alumno</th>
+            <th style="min-width:110px">Total serie</th>
+            <th style="width:36px"></th>
+          </tr>
+        </thead>
+        <tbody id="series-body"></tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td>Total colegio</td>
+            <td id="tot-students">0</td>
+            <td>—</td>
+            <td id="tot-direct">$0</td>
+            <td id="tot-ops">$0</td>
+            <td>—</td>
+            <td id="tot-order">$0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <button class="abtn" onclick="addSeries()" style="margin-top:10px">+ Agregar serie</button>
+    <div class="note">Cada serie tiene su propio número de alumnos y precio. Los pools OTE se suman al total del colegio.</div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Configuración OTE</div>
+    <div class="srow">
+      <span class="slbl">OTE direct</span>
+      <input type="range" id="pct-direct" min="0" max="15" value="5" step="0.5" oninput="syncSlider('direct');refreshAllRows();calcResults()">
+      <span class="sval" id="val-direct">5.0%</span>
+    </div>
+    <div class="srow">
+      <span class="slbl">OTE ops</span>
+      <input type="range" id="pct-ops" min="0" max="10" value="2" step="0.5" oninput="syncSlider('ops');refreshAllRows();calcResults()">
+      <span class="sval" id="val-ops">2.0%</span>
+    </div>
+    <hr class="div">
+    <div class="irow">
+      <label>Precio interno OUP → B&amp;B (CLP/licencia)</label>
+      <input type="number" id="ote-cost" value="29000" min="1" oninput="calcResults()">
+    </div>
+    <div class="note">Equivalente a ~£25 neto. Ajusta según tipo de cambio vigente.</div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Resultado — <span id="res-school" style="text-transform:none;letter-spacing:0;font-weight:400;color:#5f5e5a">Colegio X</span></div>
+    <div class="mets4">
+      <div class="met"><div class="ml">Total alumnos</div><div class="mv" id="r-students">0</div><div class="ms">todas las series</div></div>
+      <div class="met" id="r-eff-card"><div class="ml">Compras efectivas</div><div class="mv" id="r-eff">0</div><div class="ms" id="r-eff-sub">70% del total</div></div>
+      <div class="met navy"><div class="ml">Pedido total colegio</div><div class="mv" id="r-order">$0</div><div class="ms">todas las series</div></div>
+      <div class="met" id="r-ote-card"><div class="ml">Certificaciones OTE</div><div class="mv" id="r-ote">0</div><div class="ms" id="r-ote-sub">licencias generadas</div></div>
+    </div>
+    <div class="mets3">
+      <div class="met blue"><div class="ml">Pool OTE direct (CLP)</div><div class="mv" id="r-pool-direct">$0</div><div class="ms">desde compras efectivas</div></div>
+      <div class="met amber"><div class="ml">Costo OTE para B&amp;B</div><div class="mv" id="r-ote-cost">$0</div><div class="ms">a precio interno OUP</div></div>
+      <div class="met"><div class="ml">% OTE / matrícula total</div><div class="mv" id="r-ratio">0%</div><div class="ms">alcance del beneficio</div></div>
+    </div>
+    <div id="status-alert"></div>
+    <hr class="div">
+    <div class="stitle" style="margin-bottom:8px">Escenarios de compra efectiva</div>
+    <div class="scen" id="scenarios"></div>
+    <div class="note" id="sum-note" style="margin-top:12px"></div>
+  </div>
+
+  <div class="print-timestamp" id="print-ts"></div>
+
+  <button class="export-btn no-print" onclick="exportPDF()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+      <line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/>
+    </svg>
+    Descargar como PDF
+  </button>
+
+  <footer>OUP Chile · Bundle Calculator v3 · Books &amp; Bits · Uso interno</footer>
+</div>
+
+<script>
+const series = [];
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
+function fmtN(n) { return Math.round(n).toLocaleString('es-CL'); }
+
+function getPcts() {
+  return {
+    pDirect: parseFloat(document.getElementById('pct-direct').value) / 100,
+    pOps: parseFloat(document.getElementById('pct-ops').value) / 100
+  };
+}
+
+function rowCalc(s) {
+  const { pDirect, pOps } = getPcts();
+  const dPU = Math.round(s.price * pDirect);
+  const oPU = Math.round(s.price * pOps);
+  const packPU = s.price + dPU + oPU;
+  return { dPU, oPU, packPU, total: packPU * s.students };
+}
+
+function syncEff() {
+  document.getElementById('val-eff').textContent = Math.round(document.getElementById('pct-eff').value) + '%';
+}
+function syncSlider(t) {
+  document.getElementById('val-' + t).textContent = parseFloat(document.getElementById('pct-' + t).value).toFixed(1) + '%';
+}
+
+function updName(id, val) {
+  const s = series.find(x => x.id === id);
+  if (s) { s.name = val; calcResults(); }
+}
+
+function updNum(id, field, val) {
+  const s = series.find(x => x.id === id);
+  if (!s) return;
+  s[field] = parseFloat(val) || 0;
+  refreshRow(id);
+  calcResults();
+}
+
+function refreshRow(id) {
+  const s = series.find(x => x.id === id);
+  const tr = document.getElementById('row-' + id);
+  if (!s || !tr) return;
+  const { dPU, oPU, packPU, total } = rowCalc(s);
+  tr.querySelector('.cd').textContent = fmt(dPU);
+  tr.querySelector('.co').textContent = fmt(oPU);
+  tr.querySelector('.cp').textContent = fmt(packPU);
+  tr.querySelector('.ct').textContent = fmt(total);
+}
+
+function refreshAllRows() {
+  series.forEach(s => refreshRow(s.id));
+}
+
+function addSeries(name='', price=35260, students=100) {
+  const s = { id: Date.now(), name, price, students };
+  series.push(s);
+  const emptyRow = document.getElementById('empty-row');
+  if (emptyRow) emptyRow.remove();
+  const body = document.getElementById('series-body');
+  const tr = document.createElement('tr');
+  tr.id = 'row-' + s.id;
+  const { dPU, oPU, packPU, total } = rowCalc(s);
+  tr.innerHTML = `
+    <td><input class="tin" type="text" value="${s.name}" placeholder="Ej: Link It" oninput="updName(${s.id},this.value)"></td>
+    <td><input class="tin r" type="text" inputmode="numeric" value="${s.students}" placeholder="0" oninput="updNum(${s.id},'students',this.value)"></td>
+    <td><input class="tin r" type="text" inputmode="numeric" value="${s.price}" placeholder="0" oninput="updNum(${s.id},'price',this.value)"></td>
+    <td class="ote-d cd">${fmt(dPU)}</td>
+    <td class="ote-o co">${fmt(oPU)}</td>
+    <td class="cp" style="font-size:13px;font-weight:600">${fmt(packPU)}</td>
+    <td class="ct" style="font-size:13px">${fmt(total)}</td>
+    <td><button class="rbtn" onclick="removeSeries(${s.id})">×</button></td>`;
+  body.appendChild(tr);
+  calcResults();
+}
+
+function removeSeries(id) {
+  const i = series.findIndex(s => s.id === id);
+  if (i > -1) series.splice(i, 1);
+  const tr = document.getElementById('row-' + id);
+  if (tr) tr.remove();
+  if (!series.length) {
+    document.getElementById('series-body').innerHTML =
+      `<tr id="empty-row"><td colspan="8" style="color:#888780;font-size:13px;padding:12px 8px">Sin series. Agrega una.</td></tr>`;
+  }
+  calcResults();
+}
+
+function calcScenario(pct, pDirect, oteCost) {
+  const totalStudents = series.reduce((s, x) => s + (x.students || 0), 0);
+  const effU = series.reduce((s, x) => s + Math.round(x.students * pct / 100), 0);
+  const pool = series.reduce((s, x) => s + Math.round(x.price * pDirect * Math.round(x.students * pct / 100)), 0);
+  const lic = oteCost > 0 ? Math.floor(pool / oteCost) : 0;
+  return { effU, lic, active: pct >= 50, ratio: totalStudents > 0 ? (lic / totalStudents * 100).toFixed(1) : 0 };
+}
+
+function calcResults() {
+  const pEff = parseFloat(document.getElementById('pct-eff').value) / 100;
+  const { pDirect, pOps } = getPcts();
+  const oteCost = parseFloat(document.getElementById('ote-cost').value) || 29000;
+  const school = document.getElementById('school-name').value || 'Colegio X';
+  const MIN = 0.5;
+
+  const totalStudents = series.reduce((s, x) => s + (x.students || 0), 0);
+  const totalOrder    = series.reduce((s, x) => s + rowCalc(x).total, 0);
+  const totalDirect   = series.reduce((s, x) => s + rowCalc(x).dPU * x.students, 0);
+  const totalOps      = series.reduce((s, x) => s + rowCalc(x).oPU * x.students, 0);
+  const poolDirect    = series.reduce((s, x) => s + Math.round(x.price * pDirect * Math.round(x.students * pEff)), 0);
+  const lic = oteCost > 0 ? Math.floor(poolDirect / oteCost) : 0;
+  const active = pEff >= MIN;
+  const effUnits = Math.round(totalStudents * pEff);
+  const ratio = totalStudents > 0 ? (lic / totalStudents * 100).toFixed(1) : 0;
+
+  document.getElementById('tot-students').textContent = fmtN(totalStudents);
+  document.getElementById('tot-direct').textContent   = fmt(totalDirect);
+  document.getElementById('tot-ops').textContent      = fmt(totalOps);
+  document.getElementById('tot-order').textContent    = fmt(totalOrder);
+
+  document.getElementById('res-school').textContent    = school;
+  document.getElementById('r-students').textContent   = fmtN(totalStudents);
+  document.getElementById('r-eff').textContent        = fmtN(effUnits);
+  document.getElementById('r-eff-sub').textContent    = Math.round(pEff * 100) + '% del total';
+  document.getElementById('r-order').textContent      = fmt(totalOrder);
+  document.getElementById('r-ote').textContent        = fmtN(lic);
+  document.getElementById('r-ote-sub').textContent    = active ? 'bundle ACTIVADO' : 'bundle NO activado';
+  document.getElementById('r-pool-direct').textContent = fmt(poolDirect);
+  document.getElementById('r-ote-cost').textContent   = fmt(lic * oteCost);
+  document.getElementById('r-ratio').textContent      = ratio + '%';
+
+  document.getElementById('r-eff-card').className = 'met ' + (active ? 'green' : 'red');
+  document.getElementById('r-ote-card').className = 'met ' + (active && lic > 0 ? 'green' : 'red');
+
+  const al = document.getElementById('status-alert');
+  if (!totalStudents) {
+    al.innerHTML = '';
+  } else if (active && lic > 0) {
+    al.innerHTML = `<div class="alert ok">Bundle activado. ${fmtN(lic)} certificaciones OTE para ${school} — ${ratio}% de los ${fmtN(totalStudents)} alumnos. Costo OTE para B&amp;B: ${fmt(lic * oteCost)}.</div>`;
+  } else if (!active) {
+    const minU = Math.ceil(totalStudents * MIN);
+    al.innerHTML = `<div class="alert danger">Bundle no activado. Compra efectiva ${Math.round(pEff*100)}%, bajo el mínimo del 50%. Faltan ${fmtN(minU - effUnits)} compras para activarlo.</div>`;
+  } else {
+    al.innerHTML = `<div class="alert warn">Compra efectiva OK, pero sin certificaciones. Verifica los precios de las series.</div>`;
+  }
+
+  const sB = ['#faeeda','#faeeda','#eaf3de'];
+  const sC = ['#854f0b','#854f0b','#3b6d11'];
+  document.getElementById('scenarios').innerHTML = [50,70,90].map((pct,i) => {
+    const {effU,lic:l,active:a,ratio:r} = calcScenario(pct, pDirect, oteCost);
+    return `<div class="sc" style="background:${sB[i]};border-color:${sC[i]}30">
+      <div class="scn" style="color:${sC[i]}">${['Mínimo · 50%','Media · 70%','Alta · 90%'][i]}</div>
+      <div class="scv" style="color:${sC[i]}">${fmtN(l)} OTE</div>
+      <div class="scs" style="color:${sC[i]}">${fmtN(effU)} compras efectivas</div>
+      <div class="scs" style="color:${sC[i]}">${r}% de matrícula · ${a?'Bundle activo':'Bajo mínimo'}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('sum-note').textContent = active && lic > 0
+    ? `Con ${Math.round(pEff*100)}% de compra efectiva, ${fmtN(effUnits)} alumnos de ${fmtN(totalStudents)} financian ${fmtN(lic)} certificaciones OTE — ${ratio}% de la matrícula total del colegio.`
+    : '';
+}
+
+function exportPDF() {
+  const school = document.getElementById('school-name').value || 'Colegio X';
+  const now = new Date();
+  const ts = now.toLocaleDateString('es-CL', {day:'2-digit',month:'2-digit',year:'numeric'}) + ' · ' + now.toLocaleTimeString('es-CL', {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('print-ts').textContent = 'Generado el ' + ts;
+  document.title = 'OUP Bundle — ' + school;
+  window.print();
+  document.title = 'OUP Bundle Calculator — Chile v3';
+}
+
+addSeries('Link It', 35260, 80);
+addSeries('Headway', 42000, 55);
+</script>
+</body>
+</html>
